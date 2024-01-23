@@ -9,7 +9,7 @@ import pymongo
 
 def list_all(mongo_collection):
     """
-    list all collections
+    a Python function that lists all documents in a collection:
     """
     if not mongo_collection:
         return []
