@@ -16,10 +16,8 @@ UnionOfTypes = Union[str, bytes, int, float]
 
 def count_calls(method: Callable) -> Callable:
     """
-    a system to count how many
-    times methods of the Cache class are called.
-    :param method:
-    :return:
+    This decorator is used to count the number of times a method is called.
+    It increments a counter in Redis for each method call.
     """
     key = method.__qualname__
 
@@ -40,10 +38,8 @@ def count_calls(method: Callable) -> Callable:
 
 def call_history(method: Callable) -> Callable:
     """
-    add its input parameters to one list
-    in redis, and store its output into another list.
-    :param method:
-    :return:
+    This decorator is used to store the input parameters and output of a method
+    in two separate lists in Redis.
     """
     key = method.__qualname__
     i = "".join([key, ":inputs"])
@@ -62,12 +58,12 @@ def call_history(method: Callable) -> Callable:
 
 class Cache:
     """
-    Cache redis class
+    Redis Cache class
     """
 
     def __init__(self):
         """
-        constructor of the redis model
+        Constructor initializes a Redis connection and flushes the database.
         """
         self._redis = redis.Redis()
         self._redis.flushdb()
@@ -76,11 +72,8 @@ class Cache:
     @call_history
     def store(self, data: UnionOfTypes) -> str:
         """
-        generate a random key (e.g. using uuid),
-         store the input data in Redis using the
-          random key and return the key.
-        :param data:
-        :return:
+        Method generates a random key (using uuid4),stores the input data in
+        Redis using the generated key, and returns the key.
         """
         key = str(uuid4())
         if isinstance(data, (int, float)):
@@ -91,11 +84,9 @@ class Cache:
     def get(self, key: str, fn: Optional[Callable] = None) \
             -> UnionOfTypes:
         """
-        convert the data back
-        to the desired format
-        :param key:
-        :param fn:
-        :return:
+        Method retrieves data from Redis based on a given key. If a conversion
+        function (fn) is provided, it is used to convert the data back to the
+        desired format.
         """
         if fn:
             return fn(self._redis.get(key))
@@ -103,9 +94,9 @@ class Cache:
         return data
 
     def get_int(self: bytes) -> int:
-        """get a number"""
+        """Helper method to convert bytes to an integer."""
         return int.from_bytes(self, sys.byteorder)
 
     def get_str(self: bytes) -> str:
-        """get a string"""
+        """Helper method to convert bytes to a string."""
         return self.decode("utf-8")
